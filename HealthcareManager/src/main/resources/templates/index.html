@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Health care services Manager</title>
+<script th:inline="javascript">
+
+
+var list =[[${serviceList}]];
+
+var request = new XMLHttpRequest();
+var currentUrl = window.location.href; 
+
+var i=0;
+
+function interateOverList(){
+		
+	var urlouter = currentUrl + 'services/'+list[i].id;
+	
+	fetch(urlouter).then(response =>{
+		return response.json();
+		
+	}).then(async data => {
+		data.response="S";
+			const response = await fetch(currentUrl + 'services', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+	}).catch(async err =>{
+		console.log(err);
+		console.log(list[i]);
+		list[i].response="F";
+			const response = await fetch(currentUrl + 'services', {
+            method: 'PUT',
+            body: JSON.stringify(list[i]),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+	});
+	
+	console.log(i); 
+	if(i == (list.length-1)){
+		i=0;
+	}else{
+		i++;
+	}
+}
+
+
+var updateServices = setInterval(interateOverList, 1000);
+
+setTimeout(() => {
+	clearInterval(updateServices);
+}, 900000);
+
+</script>
+<style>
+
+h1 {
+  color: blue;
+  font-family: verdana;
+  font-size: 300%;
+}
+
+</style>
+</head>
+<body>
+<div align="center">
+    <h1>Health care Services Dashboard</h1>
+    <a href="/new">Create New Service</a>
+    <br/><br/>
+    <table border="1" cellpadding="10">
+        <thead>
+        <tr>
+            <th>Service ID</th>
+            <th>Service Name</th>
+            <th>URL</th>
+            <th>Response</th>
+            <th>Created time</th>
+            <th>Last updated</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+      <tbody>
+        <tr th:each="service : ${serviceList}">
+            <td th:text="${service.id}">Service ID</td>
+            <td th:text="${service.service_name}">Service Name</td>
+            <td th:text="${service.url}">URL</td>
+            <td th:text="${service.response}">Response</td>
+            <td th:text="${service.created_time}">Created Time</td>
+            <td th:text="${service.last_updated}">Last Updated</td>
+            <td>
+                <a th:href="@{/edit/{id}(id=${service.id})}" th:text="Edit"></a>                
+                &nbsp;&nbsp;&nbsp;
+                <a th:href="@{/delete/{id}(id=${service.id})}" th:text="Delete"></a>
+            </td>
+            </tr>
+            </tbody>
+    </table>
+</div>
+
+</body>
+</html>
